@@ -14,10 +14,19 @@ public class HotelReservation {
 	}
 
 	/**
-	 * Adds new hotel to hotel list
+	 * Adds new hotel to hotel list with weekdays rent only
 	 */
 	public boolean addHotel(String name, int regularWeekday) {
 		Hotel hotel = new Hotel(name, regularWeekday);
+		hotelMap.put(name, hotel);
+		return true;
+	}
+
+	/**
+	 * Adds new hotel to hotel list with weekday and weekend rent
+	 */
+	public boolean addHotel(String name, int regularWeekday, int regularWeekend) {
+		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend);
 		hotelMap.put(name, hotel);
 		return true;
 	}
@@ -30,7 +39,9 @@ public class HotelReservation {
 		for (Map.Entry<String, Hotel> entry : hotelMap.entrySet()) {
 			System.out.println("Hotel Name : " + entry.getKey());
 			System.out.println(
-					"Rate for regular customer for weekday : " + entry.getValue().getRegularWeekday() + " / day\n");
+					"Rate for regular customer for weekday : " + entry.getValue().getRegularWeekday() + " / day");
+			System.out.println(
+					"Rate for regular customer for weekend : " + entry.getValue().getRegularWeekend() + " / day\n");
 		}
 	}
 
