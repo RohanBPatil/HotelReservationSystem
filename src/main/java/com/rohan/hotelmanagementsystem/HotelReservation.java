@@ -34,12 +34,22 @@ public class HotelReservation {
 	}
 
 	/**
+	 * Adds new hotel to hotel list with weekday, weekend rent and rating
+	 */
+	public boolean addHotel(String name, int regularWeekday, int regularWeekend, int rating) {
+		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend, rating);
+		hotelMap.put(name, hotel);
+		return true;
+	}
+
+	/**
 	 * Prints all hotels and rates present in the list
 	 * 
 	 */
 	public void printAllHotels() {
 		for (Map.Entry<String, Hotel> entry : hotelMap.entrySet()) {
 			System.out.println("Hotel Name : " + entry.getKey());
+			System.out.println("Rating : " + entry.getValue().getRating());
 			System.out.println(
 					"Rate for regular customer for weekday : " + entry.getValue().getRegularWeekday() + " / day");
 			System.out.println(
@@ -62,6 +72,30 @@ public class HotelReservation {
 			System.out.print(hotel.getName() + ", ");
 		}
 		System.out.print("Total Rent : " + minimumRent + "\n");
+		return true;
+	}
+
+	/**
+	 * returns cheapest hotel for given date range having best rating
+	 */
+	public boolean cheapestBestRatedHotel(String fromDate, String toDate) {
+		Map<Integer, ArrayList<Hotel>> rentMap = createRentMap(fromDate, toDate);
+		int minimumRent = Integer.MAX_VALUE;
+		for (Map.Entry<Integer, ArrayList<Hotel>> entry : rentMap.entrySet()) {
+			if (entry.getKey() < minimumRent)
+				minimumRent = entry.getKey();
+		}
+		ArrayList<Hotel> cheapestHotels = rentMap.get(minimumRent);
+		String bestRatedCheapestHotel = "";
+		int rating = 0;
+		for (Hotel hotel : cheapestHotels) {
+			if (hotel.getRating() > rating) {
+				bestRatedCheapestHotel = hotel.getName();
+				rating = hotel.getRating();
+			}
+		}
+		System.out.println("Cheapest Hotel : " + bestRatedCheapestHotel + " Rating : " + rating + " Total Rent : "
+				+ minimumRent + "\n");
 		return true;
 	}
 
