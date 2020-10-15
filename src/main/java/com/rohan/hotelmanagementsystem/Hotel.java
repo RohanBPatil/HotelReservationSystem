@@ -24,5 +24,5 @@ public class Hotel {
 	public void setRegularWeekday(int regularWeekday) {
 		this.regularWeekday = regularWeekday;
 	}
-	
+
 }
