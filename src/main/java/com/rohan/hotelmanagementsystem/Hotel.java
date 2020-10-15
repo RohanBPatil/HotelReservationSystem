@@ -5,6 +5,7 @@ public class Hotel {
 	private int regularWeekday = 0;
 	private int regularWeekend = 0;
 	private int rating = 0;
+	private int rewardWeekday = 0, rewardWeekend = 0;
 
 	/**
 	 * can initiate only name and weekday for regular customers
@@ -14,23 +15,27 @@ public class Hotel {
 		this.regularWeekday = regularWeekday;
 	}
 
-	/**
-	 * can initiate name weekday and weekend for regular customers
-	 */
 	public Hotel(String name, int regularWeekday, int regularWeekend) {
 		this.name = name;
 		this.regularWeekday = regularWeekday;
 		this.regularWeekend = regularWeekend;
 	}
 
-	/**
-	 * can initiate name weekday and weekend for regular customers
-	 */
 	public Hotel(String name, int regularWeekday, int regularWeekend, int rating) {
 		this.name = name;
 		this.regularWeekday = regularWeekday;
 		this.regularWeekend = regularWeekend;
 		this.setRating(rating);
+	}
+
+	public Hotel(String name, int regularWeekday, int regularWeekend, int rating, int rewardWeekday,
+			int rewardWeekend) {
+		this.name = name;
+		this.regularWeekday = regularWeekday;
+		this.regularWeekend = regularWeekend;
+		this.rating = rating;
+		this.rewardWeekday = rewardWeekday;
+		this.rewardWeekend = rewardWeekend;
 	}
 
 	public String getName() {
@@ -63,6 +68,22 @@ public class Hotel {
 
 	public void setRating(int rating) {
 		this.rating = rating;
+	}
+
+	public int getRewardWeekday() {
+		return rewardWeekday;
+	}
+
+	public void setRewardWeekday(int rewardWeekday) {
+		this.rewardWeekday = rewardWeekday;
+	}
+
+	public int getRewardWeekend() {
+		return rewardWeekend;
+	}
+
+	public void setRewardWeekend(int rewardWeekend) {
+		this.rewardWeekend = rewardWeekend;
 	}
 
 }

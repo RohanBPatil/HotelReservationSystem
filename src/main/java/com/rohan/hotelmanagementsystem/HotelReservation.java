@@ -24,20 +24,21 @@ public class HotelReservation {
 		return true;
 	}
 
-	/**
-	 * Adds new hotel to hotel list with weekday and weekend rent
-	 */
 	public boolean addHotel(String name, int regularWeekday, int regularWeekend) {
 		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend);
 		hotelMap.put(name, hotel);
 		return true;
 	}
 
-	/**
-	 * Adds new hotel to hotel list with weekday, weekend rent and rating
-	 */
 	public boolean addHotel(String name, int regularWeekday, int regularWeekend, int rating) {
 		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend, rating);
+		hotelMap.put(name, hotel);
+		return true;
+	}
+
+	public boolean addHotel(String name, int regularWeekday, int regularWeekend, int rating, int rewardWeekday,
+			int rewardWeekend) {
+		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend, rating, rewardWeekday, rewardWeekend);
 		hotelMap.put(name, hotel);
 		return true;
 	}

@@ -61,4 +61,12 @@ class HotelReservationTest {
 		assertTrue(hotelReservation.bestRatedHotelForGivenDates("11 Sep 2020", "12 Sep 2020"));
 	}
 
+	@Test
+	void whenNewHotelAddedWithWeekdayAndWeekendAndRewardCustomer_shouldReturn_true() {
+		HotelReservation hotelReservation = new HotelReservation();
+		assertTrue(hotelReservation.addHotel("Lakewood", 110, 90, 3, 80, 80));
+		assertTrue(hotelReservation.addHotel("Bridgewood", 150, 50, 4, 110, 50));
+		assertTrue(hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40));
+	}
+
 }
