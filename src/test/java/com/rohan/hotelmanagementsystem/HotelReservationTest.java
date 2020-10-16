@@ -22,7 +22,7 @@ class HotelReservationTest {
 		hotelReservation.addHotel("Lakewood", 110);
 		hotelReservation.addHotel("Bridgewood", 160);
 		hotelReservation.addHotel("Ridgewood", 220);
-		assertTrue(hotelReservation.cheapestHotel("10 Sep 2020", "11 Sep 2020"));
+		assertTrue(hotelReservation.cheapestHotel("regular", "10 Sep 2020", "11 Sep 2020"));
 	}
 
 	@Test
@@ -40,7 +40,7 @@ class HotelReservationTest {
 		hotelReservation.addHotel("Lakewood", 110, 90);
 		hotelReservation.addHotel("Bridgewood", 150, 50);
 		hotelReservation.addHotel("Ridgewood", 220, 150);
-		assertTrue(hotelReservation.cheapestHotel("11 Sep 2020", "12 Sep 2020"));
+		assertTrue(hotelReservation.cheapestHotel("regular", "11 Sep 2020", "12 Sep 2020"));
 	}
 
 	@Test
@@ -49,7 +49,7 @@ class HotelReservationTest {
 		hotelReservation.addHotel("Lakewood", 110, 90, 3);
 		hotelReservation.addHotel("Bridgewood", 150, 50, 4);
 		hotelReservation.addHotel("Ridgewood", 220, 150, 5);
-		assertTrue(hotelReservation.cheapestBestRatedHotel("11 Sep 2020", "12 Sep 2020"));
+		assertTrue(hotelReservation.cheapestBestRatedHotel("regular", "11 Sep 2020", "12 Sep 2020"));
 	}
 
 	@Test
@@ -69,4 +69,23 @@ class HotelReservationTest {
 		assertTrue(hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40));
 	}
 
+	@Test
+	void cheapestBestRatedMethodForRewardCustomer_shouldPrintAndReturn_true() {
+		HotelReservation hotelReservation = new HotelReservation();
+		hotelReservation.addHotel("Lakewood", 110, 90, 3, 80, 80);
+		hotelReservation.addHotel("Bridgewood", 150, 50, 4, 110, 50);
+		hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40);
+		assertTrue(hotelReservation.cheapestBestRatedHotel("Rewards", "11 Sep 2020", "12 Sep 2020"));
+	}
+
+	@Test
+	void whenInvalidEntriesAreGiven_shouldThrow_InvalidEntryException() {
+		HotelReservation hotelReservation = new HotelReservation();
+		hotelReservation.addHotel("Lakewood", 110, 90, 3, 80, 80);
+		hotelReservation.addHotel("Bridgewood", 150, 50, 4, 110, 50);
+		hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40);
+		assertThrows(InvalidEntryException.class, () -> {
+			hotelReservation.validateInputs("NonRewards", "11 Sep 2020", "12 Sep 2020");
+		});
+	}
 }

@@ -7,6 +7,8 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HotelReservation {
 	private static Map<String, Hotel> hotelMap;
@@ -61,14 +63,14 @@ public class HotelReservation {
 	/**
 	 * returns cheapest hotel for given date range
 	 */
-	public boolean cheapestHotel(String fromDate, String toDate) {
-		Map<Integer, ArrayList<Hotel>> rentMap = createRentMap(fromDate, toDate);
+	public boolean cheapestHotel(String customerType, String fromDate, String toDate) {
+		Map<Integer, ArrayList<Hotel>> rentMap = createRentMap(customerType, fromDate, toDate);
 		int minimumRent = Integer.MAX_VALUE;
 		for (Map.Entry<Integer, ArrayList<Hotel>> entry : rentMap.entrySet()) {
 			if (entry.getKey() < minimumRent)
 				minimumRent = entry.getKey();
 		}
-		System.out.print("Cheapest Hotel : ");
+		System.out.print("Cheapest Hotel for " + customerType + " customer : ");
 		for (Hotel hotel : rentMap.get(minimumRent)) {
 			System.out.print(hotel.getName() + ", ");
 		}
@@ -79,8 +81,8 @@ public class HotelReservation {
 	/**
 	 * returns cheapest hotel for given date range having best rating
 	 */
-	public boolean cheapestBestRatedHotel(String fromDate, String toDate) {
-		Map<Integer, ArrayList<Hotel>> rentMap = createRentMap(fromDate, toDate);
+	public boolean cheapestBestRatedHotel(String customerType, String fromDate, String toDate) {
+		Map<Integer, ArrayList<Hotel>> rentMap = createRentMap(customerType, fromDate, toDate);
 		int minimumRent = Integer.MAX_VALUE;
 		for (Map.Entry<Integer, ArrayList<Hotel>> entry : rentMap.entrySet()) {
 			if (entry.getKey() < minimumRent)
@@ -95,19 +97,25 @@ public class HotelReservation {
 				rating = hotel.getRating();
 			}
 		}
-		System.out.println("Cheapest Best Rated Hotel : " + bestRatedCheapestHotel + " Rating : " + rating
-				+ " Total Rent : " + minimumRent + "\n");
+		System.out.println("Cheapest Best Rated Hotel for " + customerType + " customer : " + bestRatedCheapestHotel
+				+ " Rating : " + rating + " Total Rent : " + minimumRent + "\n");
 		return true;
 	}
 
 	/**
 	 * creates a map having rent as key and list of hotels as value
 	 */
-	public static Map<Integer, ArrayList<Hotel>> createRentMap(String fromDate, String toDate) {
+	public static Map<Integer, ArrayList<Hotel>> createRentMap(String customerType, String fromDate, String toDate) {
 		HashMap<Integer, ArrayList<Hotel>> rentMap = new HashMap<>();
 		for (Map.Entry<String, Hotel> entry : hotelMap.entrySet()) {
-			int totalRent = calculateRent(fromDate, toDate, entry.getValue().getRegularWeekday(),
-					entry.getValue().getRegularWeekend());
+			int totalRent = 0;
+			if (customerType.equalsIgnoreCase("regular")) {
+				totalRent = calculateRent(fromDate, toDate, entry.getValue().getRegularWeekday(),
+						entry.getValue().getRegularWeekend());
+			} else {
+				totalRent = calculateRent(fromDate, toDate, entry.getValue().getRewardWeekday(),
+						entry.getValue().getRewardWeekend());
+			}
 			rentMap.computeIfAbsent(totalRent, k -> new ArrayList<>()).add(entry.getValue());
 		}
 		return rentMap;
@@ -168,6 +176,22 @@ public class HotelReservation {
 		}
 		System.out.println("Best rated hotel : " + bestRatedHotel + ", Rent : " + rent);
 		return true;
+	}
+
+	/**
+	 * checks if inputs are valid or not
+	 */
+	public void validateInputs(String customerType, String fromDate, String toDate) throws InvalidEntryException {
+		String regex = "^[0-9]{2}[ ][A-Za-z]{3}[ ][0-9]{4}$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcherFrom = pattern.matcher(fromDate);
+		Matcher matcherTo = pattern.matcher(toDate);
+		if (!matcherFrom.find() || !matcherTo.find() || !customerType.equalsIgnoreCase("regular")
+				|| !customerType.equalsIgnoreCase("reward")) {
+			throw new InvalidEntryException("Inputs are invalid");
+		}
+		return;
+
 	}
 
 }
