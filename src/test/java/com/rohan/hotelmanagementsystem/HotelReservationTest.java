@@ -2,90 +2,158 @@ package com.rohan.hotelmanagementsystem;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class HotelReservationTest {
+	static HotelReservation hotelReservation;
 
-	@Test
-	void whenNewHotelAddedWithWeekday_shouldReturn_true() {
-		HotelReservation hotelReservation = new HotelReservation();
-		assertTrue(hotelReservation.addHotel("Lakewood", 110));
-		assertTrue(hotelReservation.addHotel("Bridgewood", 160));
-		assertTrue(hotelReservation.addHotel("Ridgewood", 220));
-//		System.out.println("Adding new hotel to system : ");
-//		hotelReservation.printAllHotels();
-	}
-
-	@Test
-	void whenCheapestMethodCalled_shouldReturn_nameOfHotel() {
-		HotelReservation hotelReservation = new HotelReservation();
-		hotelReservation.addHotel("Lakewood", 110);
-		hotelReservation.addHotel("Bridgewood", 160);
-		hotelReservation.addHotel("Ridgewood", 220);
-		assertTrue(hotelReservation.cheapestHotel("regular", "10 Sep 2020", "11 Sep 2020"));
-	}
-
-	@Test
-	void whenNewHotelAddedWithWeekdayAndWeekend_shouldReturn_true() {
-		HotelReservation hotelReservation = new HotelReservation();
-		hotelReservation.addHotel("Lakewood", 110, 90);
-		hotelReservation.addHotel("Bridgewood", 150, 50);
-		hotelReservation.addHotel("Ridgewood", 220, 150);
-//		hotelReservation.printAllHotels();
-	}
-
-	@Test
-	void whenCheapestMethodWithWeekdayAndWeekendCalled_shouldReturn_nameOfHotels() {
-		HotelReservation hotelReservation = new HotelReservation();
-		hotelReservation.addHotel("Lakewood", 110, 90);
-		hotelReservation.addHotel("Bridgewood", 150, 50);
-		hotelReservation.addHotel("Ridgewood", 220, 150);
-		assertTrue(hotelReservation.cheapestHotel("regular", "11 Sep 2020", "12 Sep 2020"));
-	}
-
-	@Test
-	void whenBestRatedMethodCalled_shouldReturn_cheapestAndBestRatedHotel() {
-		HotelReservation hotelReservation = new HotelReservation();
-		hotelReservation.addHotel("Lakewood", 110, 90, 3);
-		hotelReservation.addHotel("Bridgewood", 150, 50, 4);
-		hotelReservation.addHotel("Ridgewood", 220, 150, 5);
-		assertTrue(hotelReservation.cheapestBestRatedHotel("regular", "11 Sep 2020", "12 Sep 2020"));
-	}
-
-	@Test
-	void whenBestRatedMethodCalled_shouldReturn_bestRatedHotel() {
-		HotelReservation hotelReservation = new HotelReservation();
-		hotelReservation.addHotel("Lakewood", 110, 90, 3);
-		hotelReservation.addHotel("Bridgewood", 150, 50, 4);
-		hotelReservation.addHotel("Ridgewood", 220, 150, 5);
-		assertTrue(hotelReservation.bestRatedHotelForGivenDates("11 Sep 2020", "12 Sep 2020"));
-	}
-
-	@Test
-	void whenNewHotelAddedWithWeekdayAndWeekendAndRewardCustomer_shouldReturn_true() {
-		HotelReservation hotelReservation = new HotelReservation();
-		assertTrue(hotelReservation.addHotel("Lakewood", 110, 90, 3, 80, 80));
-		assertTrue(hotelReservation.addHotel("Bridgewood", 150, 50, 4, 110, 50));
-		assertTrue(hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40));
-	}
-
-	@Test
-	void cheapestBestRatedMethodForRewardCustomer_shouldPrintAndReturn_true() {
-		HotelReservation hotelReservation = new HotelReservation();
+	/**
+	 * Initiating hotelReservation object and adding hotels to it before testing
+	 */
+	@BeforeAll
+	static void initiatingHotelReservationAndAddingHotels() {
+		hotelReservation = new HotelReservation();
 		hotelReservation.addHotel("Lakewood", 110, 90, 3, 80, 80);
 		hotelReservation.addHotel("Bridgewood", 150, 50, 4, 110, 50);
 		hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40);
-		assertTrue(hotelReservation.cheapestBestRatedHotel("Rewards", "11 Sep 2020", "12 Sep 2020"));
 	}
 
+	/**
+	 * tests add method
+	 */
 	@Test
-	void whenInvalidEntriesAreGiven_shouldThrow_InvalidEntryException() {
-		HotelReservation hotelReservation = new HotelReservation();
-		hotelReservation.addHotel("Lakewood", 110, 90, 3, 80, 80);
-		hotelReservation.addHotel("Bridgewood", 150, 50, 4, 110, 50);
-		hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40);
-		assertThrows(InvalidEntryException.class, () -> {
-			hotelReservation.validateInputs("NonRewards", "11 Sep 2020", "12 Sep 2020");
-		});
+	void whenNewHotelAdded_shouldReturn_totalHotelsAdded() {
+		HotelReservation.customerType = "regular";
+		HotelReservation.fromDate = "11Sep2020";
+		HotelReservation.toDate = "12Sep2020";
+		try {
+			HotelReservation.numberOfDays();
+		} catch (InvalidEntryException e) {
+			e.printStackTrace();
+		}
+		HotelReservation.createRentMap();
+		int totalHotelsAdded = hotelReservation.totalHotels();
+		assertEquals(3, totalHotelsAdded);
 	}
+
+	/**
+	 * cheapest hotels for regular customer
+	 */
+	@Test
+	void whenCheapestHotelMethodCalled_shouldReturn_listOfHotelForRegularCustomer() {
+		HotelReservation.customerType = "regular";
+		HotelReservation.fromDate = "11Sep2020";
+		HotelReservation.toDate = "12Sep2020";
+		try {
+			HotelReservation.numberOfDays();
+		} catch (InvalidEntryException e) {
+			e.printStackTrace();
+		}
+		HotelReservation.createRentMap();
+		ArrayList<Hotel> cheapestHotelsResult = hotelReservation.getCheapestHotels();
+		assertEquals("Bridgewood", cheapestHotelsResult.get(0).getName());
+		assertEquals("Lakewood", cheapestHotelsResult.get(1).getName());
+	}
+
+	/**
+	 * cheapest hotels for reward customer
+	 */
+	@Test
+	void whenCheapestHotelMethodCalled_shouldReturn_listOfHotelForRewardCustomer() {
+		HotelReservation.customerType = "reward";
+		HotelReservation.fromDate = "11Sep2020";
+		HotelReservation.toDate = "12Sep2020";
+		try {
+			HotelReservation.numberOfDays();
+		} catch (InvalidEntryException e) {
+			e.printStackTrace();
+		}
+		HotelReservation.createRentMap();
+		ArrayList<Hotel> cheapestHotelsResult = hotelReservation.getCheapestHotels();
+		assertEquals("Bridgewood", cheapestHotelsResult.get(0).getName());
+		assertEquals("Lakewood", cheapestHotelsResult.get(1).getName());
+	}
+
+	/**
+	 * tests cheapest best rated hotel for regular customer
+	 */
+	@Test
+	void whenBestRatedMethodCalled_shouldReturn_cheapestAndBestRatedHotelforRegularCustomer() {
+		HotelReservation.customerType = "regular";
+		HotelReservation.fromDate = "11Sep2020";
+		HotelReservation.toDate = "12Sep2020";
+		try {
+			HotelReservation.numberOfDays();
+		} catch (InvalidEntryException e) {
+			e.printStackTrace();
+		}
+		HotelReservation.createRentMap();
+		ArrayList<Hotel> cheapestBestRatedHotelsResult = hotelReservation.cheapestBestRatedHotel();
+		assertEquals("Bridgewood", cheapestBestRatedHotelsResult.get(0).getName());
+	}
+
+	/**
+	 * tests cheapest best rated hotel for reward customer
+	 */
+	@Test
+	void whenBestRatedMethodCalled_shouldReturn_cheapestAndBestRatedHotelforRewardCustomer() {
+		HotelReservation.customerType = "reward";
+		HotelReservation.fromDate = "11Sep2020";
+		HotelReservation.toDate = "12Sep2020";
+		try {
+			HotelReservation.numberOfDays();
+		} catch (InvalidEntryException e) {
+			e.printStackTrace();
+		}
+		HotelReservation.createRentMap();
+		ArrayList<Hotel> cheapestBestRatedHotelsResult = hotelReservation.cheapestBestRatedHotel();
+		assertEquals("Bridgewood", cheapestBestRatedHotelsResult.get(0).getName());
+	}
+
+	/**
+	 * tests best rated hotels from all hotels
+	 */
+	@Test
+	void bestRatedHotelMethod_shouldReturn_bestRatedHotel() {
+		ArrayList<Hotel> bestRatedHotelResult = hotelReservation.bestRatedHotel();
+		assertEquals("Ridgewood", bestRatedHotelResult.get(0).getName());
+	}
+
+	/**
+	 * given wrong pattern of fromDate should throw InvalidEntryException
+	 */
+	@Test
+	void givenWrongPatternOfFromDate_shouldThrow_InvalidEntryException() {
+		HotelReservation.customerType = "reward";
+		HotelReservation.fromDate = "11Sep202"; // wrong pattern
+		HotelReservation.toDate = "12Sep2020";
+		assertThrows(InvalidEntryException.class, () -> hotelReservation.validateInputs());
+	}
+
+	/**
+	 * given wrong pattern of toDate should throw InvalidEntryException
+	 */
+	@Test
+	void givenWrongPatternOfToDate_shouldThrow_InvalidEntryException() {
+		HotelReservation.customerType = "reward";
+		HotelReservation.fromDate = "11Sep2020";
+		HotelReservation.toDate = "12-10-2020"; // wrong pattern
+		assertThrows(InvalidEntryException.class, () -> hotelReservation.validateInputs());
+	}
+
+	/**
+	 * given customer type other than regular and reward should throw
+	 * InvalidEntryException
+	 */
+	@Test
+	void givenWrongCustomerType_shouldThrow_InvalidEntryException() {
+		HotelReservation.customerType = "prime member"; // wrong customer type
+		HotelReservation.fromDate = "11Sep2020";
+		HotelReservation.toDate = "12Sep2020"; // wrong pattern
+		assertThrows(InvalidEntryException.class, () -> hotelReservation.validateInputs());
+	}
+
 }

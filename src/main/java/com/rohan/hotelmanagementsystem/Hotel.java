@@ -8,26 +8,8 @@ public class Hotel {
 	private int rewardWeekday = 0, rewardWeekend = 0;
 
 	/**
-	 * can initiate only name and weekday for regular customers
+	 * initiating all fields
 	 */
-	public Hotel(String name, int regularWeekday) {
-		this.name = name;
-		this.regularWeekday = regularWeekday;
-	}
-
-	public Hotel(String name, int regularWeekday, int regularWeekend) {
-		this.name = name;
-		this.regularWeekday = regularWeekday;
-		this.regularWeekend = regularWeekend;
-	}
-
-	public Hotel(String name, int regularWeekday, int regularWeekend, int rating) {
-		this.name = name;
-		this.regularWeekday = regularWeekday;
-		this.regularWeekend = regularWeekend;
-		this.setRating(rating);
-	}
-
 	public Hotel(String name, int regularWeekday, int regularWeekend, int rating, int rewardWeekday,
 			int rewardWeekend) {
 		this.name = name;

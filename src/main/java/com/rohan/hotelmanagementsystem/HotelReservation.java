@@ -3,195 +3,184 @@ package com.rohan.hotelmanagementsystem;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class HotelReservation {
 	private static Map<String, Hotel> hotelMap;
+	public static String customerType, fromDate, toDate;
+	private static int numOfweekdays, numOfWeekends;
+	private static TreeMap<Integer, ArrayList<Hotel>> rentMap = new TreeMap<>();
 
 	public HotelReservation() {
 		hotelMap = new HashMap<>();
 	}
 
 	/**
-	 * Adds new hotel to hotel list with weekdays rent only
+	 * Adds new hotel to hotel list
 	 */
-	public boolean addHotel(String name, int regularWeekday) {
-		Hotel hotel = new Hotel(name, regularWeekday);
-		hotelMap.put(name, hotel);
-		return true;
-	}
-
-	public boolean addHotel(String name, int regularWeekday, int regularWeekend) {
-		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend);
-		hotelMap.put(name, hotel);
-		return true;
-	}
-
-	public boolean addHotel(String name, int regularWeekday, int regularWeekend, int rating) {
-		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend, rating);
-		hotelMap.put(name, hotel);
-		return true;
-	}
-
-	public boolean addHotel(String name, int regularWeekday, int regularWeekend, int rating, int rewardWeekday,
+	public void addHotel(String name, int regularWeekday, int regularWeekend, int rating, int rewardWeekday,
 			int rewardWeekend) {
 		Hotel hotel = new Hotel(name, regularWeekday, regularWeekend, rating, rewardWeekday, rewardWeekend);
 		hotelMap.put(name, hotel);
-		return true;
 	}
 
 	/**
-	 * Prints all hotels and rates present in the list
-	 * 
+	 * returns total number of hotels
 	 */
-	public void printAllHotels() {
-		for (Map.Entry<String, Hotel> entry : hotelMap.entrySet()) {
-			System.out.println("Hotel Name : " + entry.getKey());
-			System.out.println("Rating : " + entry.getValue().getRating());
-			System.out.println(
-					"Rate for regular customer for weekday : " + entry.getValue().getRegularWeekday() + " / day");
-			System.out.println(
-					"Rate for regular customer for weekend : " + entry.getValue().getRegularWeekend() + " / day\n");
-		}
+	public int totalHotels() {
+		return hotelMap.size();
 	}
 
 	/**
 	 * returns cheapest hotel for given date range
 	 */
-	public boolean cheapestHotel(String customerType, String fromDate, String toDate) {
-		Map<Integer, ArrayList<Hotel>> rentMap = createRentMap(customerType, fromDate, toDate);
-		int minimumRent = Integer.MAX_VALUE;
-		for (Map.Entry<Integer, ArrayList<Hotel>> entry : rentMap.entrySet()) {
-			if (entry.getKey() < minimumRent)
-				minimumRent = entry.getKey();
-		}
-		System.out.print("Cheapest Hotel for " + customerType + " customer : ");
-		for (Hotel hotel : rentMap.get(minimumRent)) {
-			System.out.print(hotel.getName() + ", ");
-		}
-		System.out.print("Total Rent : " + minimumRent + "\n");
-		return true;
+	public ArrayList<Hotel> cheapestHotels() {
+		ArrayList<Hotel> cheapestHotelsList = rentMap.get(rentMap.firstKey());
+		return cheapestHotelsList;
+	}
+
+	public ArrayList<Hotel> getCheapestHotels() {
+		ArrayList<Hotel> cheapestHotelsList = cheapestHotels();
+		System.out.println("CHEAPEST HOTELS : ");
+		cheapestHotelsList.stream()
+				.forEach(hotel -> System.out.print(hotel.getName() + " Rating : " + hotel.getRating() + ", "));
+		System.out.print("Rent : " + rentMap.firstKey() + "\n");
+		return cheapestHotelsList;
 	}
 
 	/**
 	 * returns cheapest hotel for given date range having best rating
 	 */
-	public boolean cheapestBestRatedHotel(String customerType, String fromDate, String toDate) {
-		Map<Integer, ArrayList<Hotel>> rentMap = createRentMap(customerType, fromDate, toDate);
-		int minimumRent = Integer.MAX_VALUE;
-		for (Map.Entry<Integer, ArrayList<Hotel>> entry : rentMap.entrySet()) {
-			if (entry.getKey() < minimumRent)
-				minimumRent = entry.getKey();
-		}
-		ArrayList<Hotel> cheapestHotels = rentMap.get(minimumRent);
-		String bestRatedCheapestHotel = "";
-		int rating = 0;
-		for (Hotel hotel : cheapestHotels) {
-			if (hotel.getRating() > rating) {
-				bestRatedCheapestHotel = hotel.getName();
-				rating = hotel.getRating();
-			}
-		}
-		System.out.println("Cheapest Best Rated Hotel for " + customerType + " customer : " + bestRatedCheapestHotel
-				+ " Rating : " + rating + " Total Rent : " + minimumRent + "\n");
-		return true;
+	public ArrayList<Hotel> cheapestBestRatedHotel() {
+		ArrayList<Hotel> cheapestHotelsList = cheapestHotels();
+		int bestRatingInCheapestHotels = cheapestHotelsList.stream().map(hotel -> hotel.getRating()) // Finding maximum
+																										// rating in the
+																										// cheapest
+																										// hotels list
+				.max(Integer::compare).get();
+		ArrayList<Hotel> cheapestBestRatedHotels = (ArrayList<Hotel>) cheapestHotelsList.stream()
+				.filter(hotel -> hotel.getRating() == bestRatingInCheapestHotels).collect(Collectors.toList());
+		System.out.print("CHEAPEST BEST RATED HOTELS : ");
+		cheapestBestRatedHotels.stream().forEach(hotel -> System.out.print(hotel.getName() + " Rating : "
+				+ bestRatingInCheapestHotels + " Rent : " + calculateRent(hotel) + "\n"));
+		return cheapestBestRatedHotels;
 	}
 
 	/**
 	 * creates a map having rent as key and list of hotels as value
 	 */
-	public static Map<Integer, ArrayList<Hotel>> createRentMap(String customerType, String fromDate, String toDate) {
-		HashMap<Integer, ArrayList<Hotel>> rentMap = new HashMap<>();
-		for (Map.Entry<String, Hotel> entry : hotelMap.entrySet()) {
-			int totalRent = 0;
-			if (customerType.equalsIgnoreCase("regular")) {
-				totalRent = calculateRent(fromDate, toDate, entry.getValue().getRegularWeekday(),
-						entry.getValue().getRegularWeekend());
-			} else {
-				totalRent = calculateRent(fromDate, toDate, entry.getValue().getRewardWeekday(),
-						entry.getValue().getRewardWeekend());
-			}
-			rentMap.computeIfAbsent(totalRent, k -> new ArrayList<>()).add(entry.getValue());
-		}
-		return rentMap;
+	public static void createRentMap() {
+		hotelMap.values()
+				.forEach(hotel -> rentMap.computeIfAbsent(calculateRent(hotel), k -> new ArrayList<>()).add(hotel));
+	}
+
+	/**
+	 * when hotel object passed, return the total rent
+	 */
+	public static int calculateRent(Hotel h) {
+		return (customerType.equalsIgnoreCase("regular"))
+				? calculateTotalRent(h.getRegularWeekday(), h.getRegularWeekend())
+				: calculateTotalRent(h.getRewardWeekday(), h.getRewardWeekend());
 	}
 
 	/**
 	 * Calculates the total rent for given date range and rates
 	 */
-	public static int calculateRent(String fromDate, String toDate, int weekdayRate, int weekendRate) {
-		int[] numOfDays = numberOfDays(fromDate, toDate);
-		int weekdayRent = weekdayRate * numOfDays[0];
-		int weekendRent = weekendRate * numOfDays[1];
-		int totalRent = weekdayRent + weekendRent;
-		return totalRent;
+	public static int calculateTotalRent(int weekdayRate, int weekendRate) {
+		return weekdayRate * numOfweekdays + weekendRate * numOfWeekends;
 	}
 
 	/**
 	 * returns number of days in the given range
+	 * 
+	 * @throws InvalidEntryException
 	 */
-	public static int[] numberOfDays(String fromDate, String toDate) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-		// convert String to LocalDate
-		LocalDate from = LocalDate.parse(fromDate, formatter);
-		LocalDate to = LocalDate.parse(toDate, formatter);
-		int numOfweekdays = 0;
-		int numOfWeekends = 0;
+	public static void numberOfDays() throws InvalidEntryException {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy");
+		LocalDate from, to;
+		try {
+			from = LocalDate.parse(fromDate, formatter); // converting String to LocalDate
+			to = LocalDate.parse(toDate, formatter); // converting String to LocalDate
+		} catch (DateTimeParseException exception) {
+			throw new InvalidEntryException("Inputs are invalid");
+		}
 		for (LocalDate date = from; date.isBefore(to.plusDays(1)); date = date.plusDays(1)) {
 			DayOfWeek day = DayOfWeek.of(date.get(ChronoField.DAY_OF_WEEK)); // returns enum of day
-			switch (day) {
-			case SATURDAY:
+			if (day.toString().equalsIgnoreCase("SATURDAY") || day.toString().equalsIgnoreCase("SUNDAY"))
 				numOfWeekends++;
-				break;
-			case SUNDAY:
-				numOfWeekends++;
-				break;
-			default:
+			else
 				numOfweekdays++;
-				break;
-			}
 		}
-		return new int[] { numOfweekdays, numOfWeekends };
 	}
 
 	/**
 	 * this method gives best rated hotel and its rent
 	 */
-	public boolean bestRatedHotelForGivenDates(String fromDate, String toDate) {
-		int rating = 0;
-		int rent = 0;
-		String bestRatedHotel = "";
-		for (Map.Entry<String, Hotel> entry : hotelMap.entrySet()) {
-			if (entry.getValue().getRating() > rating) {
-				rating = entry.getValue().getRating();
-				bestRatedHotel = entry.getKey();
-				rent = calculateRent(fromDate, toDate, entry.getValue().getRegularWeekday(),
-						entry.getValue().getRegularWeekend());
-			}
-		}
-		System.out.println("Best rated hotel : " + bestRatedHotel + ", Rent : " + rent);
-		return true;
+	public ArrayList<Hotel> bestRatedHotel() {
+		int maxRating = hotelMap.values().stream().map(hotel -> hotel.getRating()).max(Integer::compare).get();
+		ArrayList<Hotel> bestRatedHotelsList = (ArrayList<Hotel>) hotelMap.values().stream()
+				.filter(hotel -> hotel.getRating() == maxRating).collect(Collectors.toList());
+		System.out.print("BEST RATED HOTELS : ");
+		bestRatedHotelsList.stream().forEach(hotel -> System.out
+				.print(hotel.getName() + " Rating : " + maxRating + " Rent : " + calculateRent(hotel) + "\n"));
+		return bestRatedHotelsList;
 	}
 
 	/**
 	 * checks if inputs are valid or not
 	 */
-	public void validateInputs(String customerType, String fromDate, String toDate) throws InvalidEntryException {
-		String regex = "^[0-9]{2}[ ][A-Za-z]{3}[ ][0-9]{4}$";
+	public void validateInputs() throws InvalidEntryException {
+		String regex = "^[0-9]{2}[A-Za-z]{3}[0-9]{4}$";
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcherFrom = pattern.matcher(fromDate);
 		Matcher matcherTo = pattern.matcher(toDate);
-		if (!matcherFrom.find() || !matcherTo.find() || !customerType.equalsIgnoreCase("regular")
-				|| !customerType.equalsIgnoreCase("reward")) {
-			throw new InvalidEntryException("Inputs are invalid");
+		if (matcherFrom.find()) {
+			if (matcherTo.find()) {
+				if (customerType.equalsIgnoreCase("regular") || customerType.equalsIgnoreCase("reward"))
+					return;
+			}
 		}
-		return;
-
+		throw new InvalidEntryException("Inputs are invalid");
 	}
 
+	/**
+	 * taking input of customer type and date range from user
+	 */
+	public void getInput(Scanner scanner) {
+		addHotel("Lakewood", 110, 90, 3, 80, 80);
+		addHotel("Bridgewood", 150, 50, 4, 110, 50);
+		addHotel("Ridgewood", 220, 150, 5, 100, 40);
+		System.out.println("<customerType>:<fromDate>,<toDate>");
+		String input = scanner.nextLine();
+		String[] inputs = input.split("[:,]");
+		customerType = inputs[0];
+		fromDate = inputs[1];
+		toDate = inputs[2];
+		try {
+			validateInputs();
+			numberOfDays();
+		} catch (InvalidEntryException exception) {
+			System.out.println(exception);
+		}
+		createRentMap();
+	}
+
+	public static void main(String[] args) {
+		HotelReservation hotelReservation = new HotelReservation();
+		Scanner scanner = new Scanner(System.in);
+		hotelReservation.getInput(scanner);
+		hotelReservation.getCheapestHotels();
+		hotelReservation.cheapestBestRatedHotel();
+		hotelReservation.bestRatedHotel();
+		scanner.close();
+	}
 }
